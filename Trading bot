@@ -1,0 +1,47 @@
+import ccxt
+import pandas as pd
+import time
+import os
+
+# --- Configuration ---
+SYMBOL = 'BTC/USDT'  # Trading pair
+TIMEFRAME = '1h'     # Candlestick interval (1m, 5m, 1h, etc.)
+LIMIT = 100          # Number of historical candles to fetch
+FAST = 12            # Fast EMA period for MACD
+SLOW = 26            # Slow EMA period for MACD
+SIGNAL = 9           # Signal EMA period for MACD
+EMA_PERIOD = 50      # Trend EMA period
+SLEEP_TIME = 60      # Time between checks in seconds
+
+# --- API Keys ---
+# Store API keys as environment variables for security
+API_KEY = os.getenv('API_KEY', 'YOUR_API_KEY')  # Replace 'YOUR_API_KEY' with your key if not using env vars
+SECRET_KEY = os.getenv('SECRET_KEY', 'YOUR_SECRET_KEY')
+
+# --- Initialize Exchange ---
+exchange = ccxt.binance({
+    'apiKey': API_KEY,
+    'secret': SECRET_KEY,
+})
+
+# --- Fetch Historical Data ---
+def fetch_data(symbol, timeframe, limit):
+    """Fetch historical OHLCV data for the given symbol."""
+    data = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
+    df = pd.DataFrame(data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+    return df
+
+# --- Calculate Indicators ---
+def calculate_macd(data, fast, slow, signal):
+    """Calculate MACD, Signal Line, and Histogram."""
+    data['EMA_fast'] = data['close'].ewm(span=fast).mean()
+    data['EMA_slow'] = data['close'].ewm(span=slow).mean()
+    data['MACD_Line'] = data['EMA_fast'] - data['EMA_slow']
+   
+
+
+<!---
+frejoh1/frejoh1 is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+You can click the Preview link to take a look at your changes.
+--->
